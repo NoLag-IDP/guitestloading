@@ -1,0 +1,76 @@
+-- 🟢 Mini Loading Screen with Particles Only
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+
+-- ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "MiniLoadingScreen"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = CoreGui
+
+-- White Outline Frame (Thin border)
+local outlineFrame = Instance.new("Frame")
+outlineFrame.Size = UDim2.new(0, 400, 0, 150) -- your mini size
+outlineFrame.Position = UDim2.new(0.5, -200, 0.5, -75)
+outlineFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+outlineFrame.BorderSizePixel = 0
+outlineFrame.Parent = ScreenGui
+
+local outlineCorner = Instance.new("UICorner")
+outlineCorner.CornerRadius = UDim.new(0, 12)
+outlineCorner.Parent = outlineFrame
+
+-- Main Frame inside Outline
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(1, -6, 1, -6)
+mainFrame.Position = UDim2.new(0, 3, 0, 3)
+mainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = outlineFrame
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 12)
+mainCorner.Parent = mainFrame
+
+-- Title
+local Title = Instance.new("TextLabel")
+Title.Text = "Script loading please wait!"
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Position = UDim2.new(0, 0, 0, 10)
+Title.BackgroundTransparency = 1
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Font = Enum.Font.GothamBold
+Title.TextScaled = true
+Title.Parent = mainFrame
+
+-- Subtitle
+local Subtitle = Instance.new("TextLabel")
+Subtitle.Text = "YT : bloom scripts"
+Subtitle.Size = UDim2.new(1, 0, 0, 20)
+Subtitle.Position = UDim2.new(0, 0, 0, 45)
+Subtitle.BackgroundTransparency = 1
+Subtitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+Subtitle.Font = Enum.Font.Gotham
+Subtitle.TextScaled = true
+Subtitle.Parent = mainFrame
+
+--== Particles ==--
+local ParticleFrame = Instance.new("Frame")
+ParticleFrame.Size = UDim2.new(1, 0, 1, 0)
+ParticleFrame.BackgroundTransparency = 1
+ParticleFrame.ClipsDescendants = true
+ParticleFrame.Parent = mainFrame
+
+for i = 1, 60 do
+	local dot = Instance.new("Frame")
+	dot.Size = UDim2.new(0, math.random(3, 7), 0, math.random(3, 7))
+	dot.Position = UDim2.new(math.random(), 0, math.random(), 0)
+	dot.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+	dot.BackgroundTransparency = 0.6
+	dot.BorderSizePixel = 0
+	dot.Parent = ParticleFrame
+
+	TweenService:Create(dot, TweenInfo.new(math.random(8, 15), Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, true), {
+		Position = UDim2.new(dot.Position.X.Scale + (math.random() - 0.5) / 4, 0, dot.Position.Y.Scale - 0.15, 0)
+	}):Play()
+end
