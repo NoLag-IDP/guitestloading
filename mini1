@@ -1,0 +1,100 @@
+-- 🟢 Mini Loading Screen (5 minutes, draggable)
+task.delay(60, function() -- start after the 1-minute full screen
+    local MiniScreenGui = Instance.new("ScreenGui")
+    MiniScreenGui.Name = "MiniLoadingScreen"
+    MiniScreenGui.ResetOnSpawn = false
+    MiniScreenGui.Parent = game:GetService("CoreGui")
+
+    -- Mini Frame (not full screen)
+    local MiniFrame = Instance.new("Frame")
+    MiniFrame.Size = UDim2.new(0, 400, 0, 150) -- small overlay
+    MiniFrame.Position = UDim2.new(0.5, -200, 0.5, -75) -- centered
+    MiniFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    MiniFrame.BorderSizePixel = 1
+    MiniFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)
+    MiniFrame.Parent = MiniScreenGui
+
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 12)
+    Corner.Parent = MiniFrame
+
+    -- Mini title
+    local MiniTitle = Instance.new("TextLabel")
+    MiniTitle.Text = "Finalizing..."
+    MiniTitle.Size = UDim2.new(1, 0, 0, 50)
+    MiniTitle.Position = UDim2.new(0, 0, 0, 10)
+    MiniTitle.BackgroundTransparency = 1
+    MiniTitle.TextColor3 = Color3.fromRGB(255, 0, 0)
+    MiniTitle.Font = Enum.Font.GothamBold
+    MiniTitle.TextScaled = true
+    MiniTitle.Parent = MiniFrame
+
+    -- Mini progress bar
+    local MiniProgressFrame = Instance.new("Frame")
+    MiniProgressFrame.Size = UDim2.new(0.8, 0, 0, 25)
+    MiniProgressFrame.Position = UDim2.new(0.1, 0, 0.6, 0)
+    MiniProgressFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    MiniProgressFrame.BorderSizePixel = 0
+    MiniProgressFrame.Parent = MiniFrame
+
+    local MiniFill = Instance.new("Frame")
+    MiniFill.Size = UDim2.new(0, 0, 1, 0)
+    MiniFill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    MiniFill.BorderSizePixel = 0
+    MiniFill.Parent = MiniProgressFrame
+
+    -- Mini progress update
+    local startTime = tick()
+    local totalTime = 300 -- 5 minutes
+    game:GetService("RunService").RenderStepped:Connect(function()
+        local elapsed = tick() - startTime
+        local progress = math.clamp(elapsed / totalTime, 0, 1)
+        MiniFill.Size = UDim2.new(progress, 0, 1, 0)
+    end)
+
+    -- Draggable function for mobile & PC
+    local UserInputService = game:GetService("UserInputService")
+    local dragging = false
+    local dragInput, dragStart, startPos
+
+    local function update(input)
+        local delta = input.Position - dragStart
+        MiniFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+                                       startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+
+    MiniFrame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or
+           input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = MiniFrame.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    MiniFrame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or
+           input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            update(input)
+        end
+    end)
+
+    -- Remove after 5 minutes
+    task.delay(300, function()
+        if MiniScreenGui and MiniScreenGui.Parent then
+            MiniScreenGui:Destroy()
+        end
+    end)
+end)
